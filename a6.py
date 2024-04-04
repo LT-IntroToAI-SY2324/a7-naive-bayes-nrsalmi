@@ -59,6 +59,8 @@ class BayesClassifier:
         # stored below is how you would load a file with filename given by `fName`
         # `text` here will be the literal text of the file (i.e. what you would see
         # if you opened the file in a text editor
+
+        # fName = files[0]
         # text = self.load_file(os.path.join(self.training_data_directory, fName))
 
 
@@ -66,8 +68,11 @@ class BayesClassifier:
         # enumerate function, which loops over something and has an automatic counter.
         # write something like this to track progress (note the `# type: ignore` comment
         # which tells mypy we know better and it shouldn't complain at us on this line):
-        # for index, filename in enumerate(files, 1): # type: ignore
-        #     print(f"Training on file {index} of {len(files)}")
+        for index, filename in enumerate(files, 1): # type: ignore
+            print(f"Training on file {index} of {len(files)}")
+            print(filename)
+            text = self.load_file(os.path.join(self.training_data_directory, filename))
+            # print(text)
         #     <the rest of your code for updating frequencies here>
 
 
@@ -76,19 +81,28 @@ class BayesClassifier:
         
         # for each file, if it is a negative file, update (see the Updating frequencies
         # set of comments for what we mean by update) the frequencies in the negative
-        # frequency dictionary. If it is a positive file, update (again see the Updating
+        # frequency dictionary. If it is a pos  itive file, update (again see the Updating
         # frequencies set of comments for what we mean by update) the frequencies in the
         # positive frequency dictionary. If it is neither a postive or negative file,
         # ignore it and move to the next file (this is more just to be safe; we won't
         # test your code with neutral reviews)
-        
+            print(filename.startswith(self.pos_file_prefix))
+            print(filename.startswith(self.neg_file_prefix))
+            tokens = self.tokenize(text)
+            print(tokens)
 
         # Updating frequences: to update the frequencies for each file, you need to get
         # the text of the file, tokenize it, then update the appropriate dictionary for
         # those tokens. We've asked you to write a function `update_dict` that will make
         # your life easier here. Write that function first then pass it your list of
         # tokens from the file and the appropriate dictionary
-        
+            self.update_dict(tokens, self.pos_freqs)
+            if filename.startswith(self.pos_file_prefix):
+                self.update_dict(tokens, self.pos_freqs)
+            elif filename.startswith(self.neg_file_prefix):
+                self.update_dict(tokens, self.pos_freqs)
+
+        # print(self.pos_freqs)
 
         # for debugging purposes, it might be useful to print out the tokens and their
         # frequencies for both the positive and negative dictionaries
@@ -98,6 +112,9 @@ class BayesClassifier:
         # avoid extra work in the future (using the save_dict method). The objects you
         # are saving are self.pos_freqs and self.neg_freqs and the filepaths to save to
         # are self.pos_filename and self.neg_filename
+
+        self.save_dict(self.pos_freqs, self.pos_filename)
+        self.save_dict(self.neg_freqs, self.neg_filename)
 
     def classify(self, text: str) -> str:
         """Classifies given text as positive, negative or neutral from calculating the
@@ -222,12 +239,17 @@ class BayesClassifier:
             freqs - dictionary of frequencies to update
         """
         # TODO: your work here
-        pass  # remove this line once you've implemented this method
+        for word in words:
+            if(word in freqs):
+                freqs[word] += 1
+            else:
+                freqs[word] = 1
+
 
 
 if __name__ == "__main__":
     # uncomment the below lines once you've implemented `train` & `classify`
-    # b = BayesClassifier()
+    b = BayesClassifier()
     # a_list_of_words = ["I", "really", "like", "this", "movie", ".", "I", "hope", \
     #                    "you", "like", "it", "too"]
     # a_dictionary = {}
